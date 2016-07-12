@@ -4,11 +4,30 @@ require "haversine"
 
 module Locatable
 
+  def Locatable.included other
+    other.extend Locatable::ClassMethods
+  end
+
   def distance_to lat, long
     d = Haversine.distance(self.latitude, self.longitude, lat, long )
     d.to_m
   end
 
+
+  module ClassMethods
+
+    def closest_to lat, long
+      @points= self.all
+      miles = {}
+      @points.each do |s|
+        distance = Haversine.distance(lat, long, s.latitude, s.longitude).to_m
+        miles[s] = distance 
+      end
+      sorted = miles.sort_by { |k,v| v}
+      return sorted.first[0]
+    end
+
+  end
 end
 
 class Station
